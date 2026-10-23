@@ -1,4 +1,4 @@
-package servers.models;
+package servers.business.models;
 
 public class Producto {
     private String nombre;

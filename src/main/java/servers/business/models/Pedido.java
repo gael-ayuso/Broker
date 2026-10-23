@@ -1,4 +1,4 @@
-package servers.models;
+package servers.business.models;
 
 
 import java.util.ArrayList;

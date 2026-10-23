@@ -1,4 +1,4 @@
-package servers.business.models.services;
+package servers.business.services;
 
 
 import servers.business.models.Pedido;
@@ -35,7 +35,8 @@ public class PedidoService {
     }
 
 
-    public Pedido registrarPedido(Pedido pedido) {
+    public Pedido registrarPedido(String Cliente, List<Producto> productos) {
+        Pedido pedido = new Pedido(String.valueOf(siguienteId), Cliente, productos);
         validarDatos(pedido);
         comprobarDisponibilidad(pedido);
         calcularSubtotal(pedido);
