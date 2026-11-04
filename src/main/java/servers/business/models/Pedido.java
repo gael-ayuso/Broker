@@ -1,23 +1,20 @@
 package servers.business.models;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Pedido {
-    private final String id;
-    private final List<Producto> productos;
+    private Integer id;
     private String cliente;
+    private List<Producto> productos;
     private Double subtotal;
     private Double descuento;
     private Double impuestos;
     private Double total;
     private String estado;
 
-    public Pedido(String id, String cliente, List<Producto> productos) {
-        this.id = id;
-        this.cliente = cliente;
-        this.productos = productos;
+    public Pedido() {
+        this.productos = new ArrayList<>();
         this.subtotal = 0.0;
         this.descuento = 0.0;
         this.impuestos = 0.0;
@@ -25,12 +22,27 @@ public class Pedido {
         this.estado = "Pendiente";
     }
 
-    public Pedido(String id, String cliente) {
+    public Pedido(Integer id, String cliente, List<Producto> productos) {
+        this.id = id;
+        this.cliente = cliente;
+        this.productos = productos != null ? productos : new ArrayList<>();
+        this.subtotal = 0.0;
+        this.descuento = 0.0;
+        this.impuestos = 0.0;
+        this.total = 0.0;
+        this.estado = "Pendiente";
+    }
+
+    public Pedido(Integer id, String cliente) {
         this(id, cliente, new ArrayList<>());
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getCliente() {
@@ -43,6 +55,10 @@ public class Pedido {
 
     public List<Producto> getProductos() {
         return productos;
+    }
+
+    public void setProductos(List<Producto> productos) {
+        this.productos = productos;
     }
 
     public Double getSubtotal() {
@@ -87,6 +103,9 @@ public class Pedido {
 
     public boolean agregarProducto(Producto producto) {
         if (producto == null) return false;
-        return productos.add(producto);
+        if (this.productos == null) {
+            this.productos = new ArrayList<>();
+        }
+        return this.productos.add(producto);
     }
 }
