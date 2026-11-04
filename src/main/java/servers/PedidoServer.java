@@ -70,6 +70,8 @@ public class PedidoServer {
 
         } catch (IOException e) {
             System.err.println("[PedidoServer] Error fatal al iniciar ServerSocket: " + e.getMessage());
+        }finally {
+           this.threadPool.shutdown();
         }
     }
 

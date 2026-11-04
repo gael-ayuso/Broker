@@ -87,11 +87,4 @@ public class ProcesarSolicitud {
         }
     }
 
-    public PedidoService getPedidoService() {
-        return pedidoService;
-    }
-
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
 }
