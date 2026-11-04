@@ -1,0 +1,24 @@
+{
+  "servicio": "ejecutar",
+  "estado": "OK",
+  "resultado": {
+    "servicio": "consultarPedido",
+    "respuesta": {
+      "id": 1,
+      "cliente": "Ana López",
+      "productos": [
+        {
+          "nombre": "Producto A",
+          "precio": 600.0,
+          "cantidad": 2,
+          "existencia": 10
+        }
+      ],
+      "subtotal": 1200.0,
+      "descuento": 120.0,
+      "impuestos": 172.8,
+      "total": 1252.8,
+      "estado": "PROCESADO"
+    }
+  }
+}

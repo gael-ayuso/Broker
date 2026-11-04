@@ -1,0 +1,8 @@
+{
+  "servicio": "registrar",
+  "parametros": {
+    "nombre": "registrarPedido",
+    "ip": "127.0.0.1",
+    "puerto": 9001
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "servicio": "consultarPedido",
+  "parametros": {
+    "id": 1
+  }
+}

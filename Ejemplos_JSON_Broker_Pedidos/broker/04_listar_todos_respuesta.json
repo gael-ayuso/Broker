@@ -1,0 +1,15 @@
+{
+  "servicio": "listar",
+  "estado": "OK",
+  "resultado": [
+    {
+      "nombre": "registrarPedido"
+    },
+    {
+      "nombre": "consultarPedido"
+    },
+    {
+      "nombre": "listarPedidos"
+    }
+  ]
+}

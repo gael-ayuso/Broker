@@ -1,0 +1,14 @@
+{
+  "servicio": "registrarPedido",
+  "parametros": {
+    "cliente": "Ana López",
+    "productos": [
+      {
+        "nombre": "Producto A",
+        "precio": 600.0,
+        "cantidad": 2,
+        "existencia": 10
+      }
+    ]
+  }
+}

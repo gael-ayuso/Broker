@@ -1,0 +1,5 @@
+{
+  "servicio": "consultarPedido",
+  "estado": "ERROR",
+  "mensaje": "Pedido no encontrado"
+}

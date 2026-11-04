@@ -1,0 +1,17 @@
+{
+  "servicio": "ejecutar",
+  "parametros": {
+    "servicio": "registrarPedido",
+    "argumentos": {
+      "cliente": "Ana López",
+      "productos": [
+        {
+          "nombre": "Producto A",
+          "precio": 600.0,
+          "cantidad": 2,
+          "existencia": 10
+        }
+      ]
+    }
+  }
+}

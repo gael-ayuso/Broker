@@ -1,0 +1,9 @@
+{
+  "servicio": "listar",
+  "estado": "OK",
+  "resultado": [
+    {
+      "nombre": "consultarPedido"
+    }
+  ]
+}

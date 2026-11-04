@@ -1,0 +1,6 @@
+{
+  "servicio": "listar",
+  "parametros": {
+    "buscar": "consultar"
+  }
+}

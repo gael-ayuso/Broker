@@ -1,0 +1,7 @@
+{
+  "servicio": "ejecutar",
+  "parametros": {
+    "servicio": "servicioInexistente",
+    "argumentos": {}
+  }
+}

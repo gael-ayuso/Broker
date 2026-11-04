@@ -1,0 +1,9 @@
+{
+  "servicio": "ejecutar",
+  "parametros": {
+    "servicio": "consultarPedido",
+    "argumentos": {
+      "id": 1
+    }
+  }
+}
