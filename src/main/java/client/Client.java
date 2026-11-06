@@ -122,22 +122,19 @@ public class Client {
 
         while (continuar) {
             mostrarMenu(out);
-            int opcion = leerEntero(scanner, out, "Seleccione una opcion: ", 1, 6);
+            int opcion = leerEntero(scanner, out, "Seleccione una opcion: ", 1, 3);
 
             switch (opcion) {
-                case 1 -> menuListarServicios(out);
-                case 2 -> menuBuscarServicio(scanner, out);
-                case 3 -> menuRegistrarPedido(scanner, out);
-                case 4 -> menuConsultarPedido(scanner, out);
-                case 5 -> menuListarPedidos(out);
-                case 6 -> {
+                case 1 -> menuListarYEjecutar(scanner, out);
+                case 2 -> menuBuscarYEjecutar(scanner, out);
+                case 3 -> {
                     continuar = false;
                     out.println("\nSaliendo del cliente.");
                 }
             }
 
             if (continuar) {
-                out.print("\nPresione Enter para volver al menu...");
+                out.print("\nPresione Enter para volver al menu principal...");
                 scanner.nextLine();
             }
         }
@@ -148,28 +145,50 @@ public class Client {
         out.println("----------------------------------------");
         out.println("1. Listar servicios disponibles en el Broker");
         out.println("2. Buscar servicio en el Broker");
-        out.println("3. Registrar nuevo pedido");
-        out.println("4. Consultar pedido por ID");
-        out.println("5. Listar todos los pedidos");
-        out.println("6. Salir");
+        out.println("3. Salir");
         out.println("----------------------------------------");
     }
 
-    private void menuListarServicios(PrintStream out) {
+    // --- LOGICA DE DESCUBRIMIENTO Y EJECUCION ---
+
+    private void menuListarYEjecutar(Scanner scanner, PrintStream out) {
         out.println("\n[Consultando servicios en el Broker...]");
         out.println(listarServicios());
+        seleccionarYEjecutar(scanner, out);
     }
 
-    private void menuBuscarServicio(Scanner scanner, PrintStream out) {
+    private void menuBuscarYEjecutar(Scanner scanner, PrintStream out) {
         out.println("\nBUSQUEDA DE SERVICIOS");
         out.println("----------------------------------------");
         String criterio = leerTexto(scanner, out, "Termino a buscar: ");
         out.println("\n[Buscando servicios...]");
         out.println(buscarServicio(criterio));
+        seleccionarYEjecutar(scanner, out);
     }
 
+    private void seleccionarYEjecutar(Scanner scanner, PrintStream out) {
+        out.println("\nEscriba el nombre exacto del servicio que desea ejecutar");
+        out.println("(o presione Enter sin escribir nada para cancelar y volver):");
+        out.print("Servicio: ");
+        String servicio = scanner.nextLine().trim();
+
+        if (servicio.isEmpty()) {
+            return; // El usuario canceló la acción
+        }
+
+        // Ruteador local del cliente hacia las interfaces de captura
+        switch (servicio) {
+            case "registrarPedido" -> menuRegistrarPedido(scanner, out);
+            case "consultarPedido" -> menuConsultarPedido(scanner, out);
+            case "listarPedidos" -> menuListarPedidos(out);
+            default -> out.println("\n❌ El servicio '" + servicio + "' no esta implementado en la interfaz de este cliente.");
+        }
+    }
+
+    // --- MENUS DE CAPTURA DE DATOS PARA LOS SERVICIOS ---
+
     private void menuRegistrarPedido(Scanner scanner, PrintStream out) {
-        out.println("\nREGISTRAR NUEVO PEDIDO");
+        out.println("\n>>> EJECUTANDO: registrarPedido");
         out.println("----------------------------------------");
         String cliente = leerTexto(scanner, out, "Nombre del cliente: ");
 
@@ -196,7 +215,7 @@ public class Client {
     }
 
     private void menuConsultarPedido(Scanner scanner, PrintStream out) {
-        out.println("\nCONSULTAR PEDIDO POR ID");
+        out.println("\n>>> EJECUTANDO: consultarPedido");
         out.println("----------------------------------------");
         int id = leerEntero(scanner, out, "ID del pedido: ", 1, Integer.MAX_VALUE);
 
@@ -205,11 +224,14 @@ public class Client {
     }
 
     private void menuListarPedidos(PrintStream out) {
+        out.println("\n>>> EJECUTANDO: listarPedidos");
+        out.println("----------------------------------------");
         out.println("\n[Consultando lista de pedidos al Broker...]");
         out.println(listarPedidos());
     }
 
-    // Validacion de entrada de datos
+    // --- VALIDACION DE ENTRADA DE DATOS ---
+
     private int leerEntero(Scanner scanner, PrintStream out, String mensaje, int min, int max) {
         while (true) {
             out.print(mensaje);
@@ -253,6 +275,7 @@ public class Client {
         }
     }
 
+    // --- METODO MAIN ---
     // Formato: java client.Client 127.0.0.1:9000
     public static void main(String[] args) {
         String brokerIp = "127.0.0.1";
