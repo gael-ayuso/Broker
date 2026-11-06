@@ -2,7 +2,7 @@ package servers;
 
 import servers.business.services.PedidoService;
 import servers.network.BrokerRegistrar;
-import servers.network.AtenderCliente;
+import servers.network.AtenderSolicitud;
 import servers.repositories.PedidoRepositoryMemoria;
 
 import java.io.IOException;
@@ -32,6 +32,8 @@ public class PedidoServer {
     private final int brokerPort;
     private final ProcesarSolicitud procesarSolicitud;
     private final ExecutorService threadPool;
+    private volatile boolean running = false;
+    private ServerSocket serverSocket;
 
     public PedidoServer(int serverPort, String brokerIp, int brokerPort) {
         this(serverPort, brokerIp, brokerPort, new ProcesarSolicitud(new PedidoService(new PedidoRepositoryMemoria())));
@@ -49,29 +51,45 @@ public class PedidoServer {
         this.threadPool = Executors.newFixedThreadPool(10);
     }
 
-    public void start() {
-        // 1. Registrar servicios en el Broker
-        registrarEnBroker();
+    public void stop() {
+        running = false;
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+            } catch (IOException ignored) {}
+        }
+        threadPool.shutdown();
+    }
 
-        // 2. Iniciar servidor TCP de escucha
-        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+    public void start() {
+        running = true;
+        // 1. Iniciar servidor TCP de escucha primero para garantizar que acepte conexiones
+        try (ServerSocket ss = new ServerSocket(serverPort)) {
+            this.serverSocket = ss;
             System.out.println(" Servidor de Pedidos iniciado en el puerto: " + serverPort);
             System.out.println(" Broker objetivo: " + brokerIp + ":" + brokerPort);
             System.out.println(" Servicios disponibles: " + SERVICIOS_DISPONIBLES);
 
-            while (true) {
+            // 2. Registrar servicios en el Broker
+            registrarEnBroker();
+
+            while (running) {
                 try {
-                    Socket socketBroker = serverSocket.accept();
-                    threadPool.submit(new AtenderCliente(socketBroker, procesarSolicitud));
+                    Socket socketBroker = ss.accept();
+                    threadPool.submit(new AtenderSolicitud(socketBroker, procesarSolicitud));
                 } catch (IOException e) {
-                    System.err.println("[PedidoServer] Error al aceptar conexión: " + e.getMessage());
+                    if (running) {
+                        System.err.println("[PedidoServer] Error al aceptar conexión: " + e.getMessage());
+                    }
                 }
             }
 
         } catch (IOException e) {
-            System.err.println("[PedidoServer] Error fatal al iniciar ServerSocket: " + e.getMessage());
-        }finally {
-           this.threadPool.shutdown();
+            if (running) {
+                System.err.println("[PedidoServer] Error fatal al iniciar ServerSocket: " + e.getMessage());
+            }
+        } finally {
+            this.threadPool.shutdown();
         }
     }
 

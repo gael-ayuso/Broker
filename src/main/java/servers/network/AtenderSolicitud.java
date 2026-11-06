@@ -9,12 +9,12 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
-public class AtenderCliente implements Runnable {
+public class AtenderSolicitud implements Runnable {
 
     private final Socket socket;
     private final ProcesarSolicitud procesarSolicitud;
 
-    public AtenderCliente(Socket socket, ProcesarSolicitud procesarSolicitud) {
+    public AtenderSolicitud(Socket socket, ProcesarSolicitud procesarSolicitud) {
         this.socket = socket;
         this.procesarSolicitud = procesarSolicitud;
     }
@@ -40,7 +40,7 @@ public class AtenderCliente implements Runnable {
             }
 
         } catch (Exception e) {
-            System.err.println("[ClientConnectionHandler] Error en la conexión con el Broker: " + e.getMessage());
+            System.err.println("[AtenderSolicitud] Error en la conexión con el Broker: " + e.getMessage());
         }
     }
 }
