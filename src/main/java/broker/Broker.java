@@ -209,6 +209,7 @@ public class Broker {
                 // Si el servidor devolvió un error, el broker pasa el error al cliente
                 respuestaBroker.addProperty("estado", "ERROR");
                 respuestaBroker.addProperty("mensaje", respuestaServidor.has("mensaje") ? respuestaServidor.get("mensaje").getAsString() : "Error en servidor");
+                System.out.println("Error en el servidor: " + respuestaServidor.get("mensaje").getAsString());
             } else {
                 // Si fue OK, se empaqueta la respuesta
                 respuestaBroker.addProperty("estado", "OK");
