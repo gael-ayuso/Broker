@@ -181,7 +181,7 @@ public class Client {
             case "registrarPedido" -> menuRegistrarPedido(scanner, out);
             case "consultarPedido" -> menuConsultarPedido(scanner, out);
             case "listarPedidos" -> menuListarPedidos(out);
-            default -> out.println("\n❌ El servicio '" + servicio + "' no esta implementado en la interfaz de este cliente.");
+            default -> out.println("\n El servicio '" + servicio + "' no esta implementado en la interfaz de este cliente.");
         }
     }
 

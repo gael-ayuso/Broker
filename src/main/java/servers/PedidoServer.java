@@ -3,6 +3,7 @@ package servers;
 import servers.business.services.PedidoService;
 import servers.network.BrokerRegistrar;
 import servers.network.AtenderSolicitud;
+import servers.repositories.PedidoArchivoCSV;
 import servers.repositories.PedidoRepositoryMemoria;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class PedidoServer {
     private ServerSocket serverSocket;
 
     public PedidoServer(int serverPort, String brokerIp, int brokerPort) {
-        this(serverPort, brokerIp, brokerPort, new ProcesarSolicitud(new PedidoService(new PedidoRepositoryMemoria())));
+        this(serverPort, brokerIp, brokerPort, new ProcesarSolicitud(new PedidoService(new PedidoArchivoCSV())));
     }
 
     public PedidoServer(int serverPort, String brokerIp, int brokerPort, PedidoService pedidoService) {
