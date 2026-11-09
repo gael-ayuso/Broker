@@ -8,9 +8,12 @@ import servers.repositories.PedidoRepositoryMemoria;
 
 import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -96,10 +99,60 @@ public class PedidoServer {
         }
     }
 
-    private void registrarEnBroker() throws UnknownHostException {
+    public String obtenerIpLocal() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
 
-        String ipLocal = Inet4Address.getLocalHost().getHostAddress();
+                if (!iface.isUp() || iface.isLoopback() || iface.isVirtual()) {
+                    continue;
+                }
 
+                String nombre = iface.getName().toLowerCase();
+                String displayName = iface.getDisplayName().toLowerCase();
+
+
+                // Recorrer direcciones IP asignadas a esta interfaz
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+
+                    // Buscar IPv4 válida que no sea de loopback ni enlace local (169.254.x.x)
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress() && !addr.isLinkLocalAddress()) {
+                        // Priorizar direcciones de red local privada (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+                        if (addr.isSiteLocalAddress()) {
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+
+            // Segunda pasada más permisiva en caso de que ninguna coincida con los filtros estrictos
+            interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                if (iface.isUp() && !iface.isLoopback()) {
+                    Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        InetAddress addr = addresses.nextElement();
+                        if (addr instanceof Inet4Address && !addr.isLoopbackAddress() && !addr.isLinkLocalAddress()) {
+                            return addr.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[PedidoServer] Error al obtener IP por NetworkInterface: " + e.getMessage());
+        }
+
+        return "127.0.0.1";
+    }
+
+    private void registrarEnBroker() {
+        String ipLocal = obtenerIpLocal();
+
+        System.out.println("[PedidoServer] IP local detectada para registro: " + ipLocal);
         System.out.println("[PedidoServer] Registrando servicios con el Broker...");
         BrokerRegistrar registrar = new BrokerRegistrar(brokerIp, brokerPort);
         boolean exito = registrar.registrarServicios(SERVICIOS_DISPONIBLES, ipLocal, serverPort);

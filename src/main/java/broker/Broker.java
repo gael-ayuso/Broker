@@ -3,6 +3,7 @@ package broker;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,7 +104,7 @@ public class Broker {
                         // Enrutador principal del Broker
                         switch (servicio) {
                             case "registrar":
-                                registerServer(parametros, respuesta);
+                                registerServer(parametros, respuesta, socket);
                                 break;
                             case "listar":
                                 listServers(parametros, respuesta);
@@ -133,7 +134,7 @@ public class Broker {
     }
 
     // 1. Servicio: Registrar
-    private void registerServer(JsonObject parametros, JsonObject respuesta) {
+    private void registerServer(JsonObject parametros, JsonObject respuesta, Socket socketCliente) {
         if (!parametros.has("nombre") || !parametros.has("ip") || !parametros.has("puerto")) {
             respuesta.addProperty("estado", "ERROR");
             respuesta.addProperty("mensaje", "Parámetro obligatorio ausente");
@@ -144,7 +145,20 @@ public class Broker {
         String ip = parametros.get("ip").getAsString();
         int puerto = parametros.get("puerto").getAsInt();
 
-        directorioServicios.putIfAbsent(nombre, List.of(new ServerInfo(ip, puerto)));
+        // Si el servidor envió 127.0.0.1 pero la conexión proviene de otra máquina externa,
+        // usar automáticamente la IP real de donde proviene el socket
+        if (("127.0.0.1".equals(ip) || "localhost".equalsIgnoreCase(ip)) && socketCliente != null) {
+            InetAddress remoteAddr = socketCliente.getInetAddress();
+            if (remoteAddr != null && !remoteAddr.isLoopbackAddress()) {
+                String ipRemota = remoteAddr.getHostAddress();
+                System.out.println("[Broker] Ajustando IP de registro para '" + nombre + "': de " + ip + " a IP remota " + ipRemota);
+                ip = ipRemota;
+            }
+        }
+
+        if (!directorioServicios.containsKey(nombre)) {
+            directorioServicios.put(nombre, new ArrayList<>());
+        }
         directorioServicios.get(nombre).add(new ServerInfo(ip, puerto));
 
         respuesta.addProperty("estado", "OK");
@@ -190,7 +204,7 @@ public class Broker {
         }
 
         List<ServerInfo> listInfo = directorioServicios.get(nombreServicio);
-        int randomWithMathRandom = (int) (Math.random() * (listInfo.size()+1));
+        int randomWithMathRandom = (int) (Math.random() * listInfo.size());
         ServerInfo info = listInfo.get(randomWithMathRandom);
 
         // Crear una nueva conexión TCP hacia el Servidor real
