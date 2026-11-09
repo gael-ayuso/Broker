@@ -7,8 +7,10 @@ import servers.repositories.PedidoArchivoCSV;
 import servers.repositories.PedidoRepositoryMemoria;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -94,10 +96,13 @@ public class PedidoServer {
         }
     }
 
-    private void registrarEnBroker() {
+    private void registrarEnBroker() throws UnknownHostException {
+
+        String ipLocal = Inet4Address.getLocalHost().getHostAddress();
+
         System.out.println("[PedidoServer] Registrando servicios con el Broker...");
         BrokerRegistrar registrar = new BrokerRegistrar(brokerIp, brokerPort);
-        boolean exito = registrar.registrarServicios(SERVICIOS_DISPONIBLES, "127.0.0.1", serverPort);
+        boolean exito = registrar.registrarServicios(SERVICIOS_DISPONIBLES, ipLocal, serverPort);
         if (exito) {
             System.out.println("[PedidoServer] Todos los servicios fueron registrados exitosamente.");
         } else {
