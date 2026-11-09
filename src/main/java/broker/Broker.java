@@ -216,6 +216,7 @@ public class Broker {
                 resultado.addProperty("servicio", nombreServicio);
                 resultado.add("respuesta", respuestaServidor.get("resultado"));
                 respuestaBroker.add("resultado", resultado);
+                System.out.println("Servicio ejecutado: " + resultado);
             }
 
         } catch (Exception e) {
