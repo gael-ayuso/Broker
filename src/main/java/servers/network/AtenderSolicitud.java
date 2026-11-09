@@ -32,10 +32,12 @@ public class AtenderSolicitud implements Runnable {
                 if (lineaPeticion.trim().isEmpty()) {
                     continue;
                 }
+                System.out.println("[AtenderSolicitud] Recibiendo peticion: \n" + lineaPeticion);
 
                 // PROCESAR
                 String jsonRespuesta = procesarSolicitud.procesarPeticion(lineaPeticion);
 
+                System.out.println("[AtenderSolicitud] Enviando respuesta: \n" + jsonRespuesta);
                 salida.println(jsonRespuesta);
             }
 

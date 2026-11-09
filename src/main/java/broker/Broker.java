@@ -3,6 +3,7 @@ package broker;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.gson.*;
@@ -10,7 +11,7 @@ import com.google.gson.*;
 public class Broker {
 
     // Directorio de servicios: Llave = nombre del servicio, Valor = Info de conexión
-    private final Map<String, ServerInfo> directorioServicios = new ConcurrentHashMap<>();
+    private final Map<String, List<ServerInfo>> directorioServicios = new ConcurrentHashMap<>();
     private int idRegistroContador = 1;
     private volatile boolean running = false;
     private ServerSocket serverSocket;
@@ -87,6 +88,7 @@ public class Broker {
                 JsonObject respuesta = new JsonObject();
                 try {
                     JsonObject peticion = JsonParser.parseString(linea).getAsJsonObject();
+                    System.out.println("Peticion recibida: \n" + peticion);
                     if (!peticion.has("servicio") || peticion.get("servicio").isJsonNull()) {
                         respuesta.addProperty("estado", "ERROR");
                         respuesta.addProperty("mensaje", "Parámetro obligatorio ausente: servicio");
@@ -113,6 +115,7 @@ public class Broker {
                                 respuesta.addProperty("estado", "ERROR");
                                 respuesta.addProperty("mensaje", "Servicio del Broker inexistente");
                         }
+                        System.out.println(respuesta);
                     }
                 } catch (JsonSyntaxException e) {
                     respuesta.addProperty("estado", "ERROR");
@@ -141,7 +144,8 @@ public class Broker {
         String ip = parametros.get("ip").getAsString();
         int puerto = parametros.get("puerto").getAsInt();
 
-        directorioServicios.put(nombre, new ServerInfo(ip, puerto));
+        directorioServicios.putIfAbsent(nombre, List.of(new ServerInfo(ip, puerto)));
+        directorioServicios.get(nombre).add(new ServerInfo(ip, puerto));
 
         respuesta.addProperty("estado", "OK");
         JsonObject resultado = new JsonObject();
@@ -185,7 +189,9 @@ public class Broker {
             return;
         }
 
-        ServerInfo info = directorioServicios.get(nombreServicio);
+        List<ServerInfo> listInfo = directorioServicios.get(nombreServicio);
+        int randomWithMathRandom = (int) (Math.random() * (listInfo.size()+1));
+        ServerInfo info = listInfo.get(randomWithMathRandom);
 
         // Crear una nueva conexión TCP hacia el Servidor real
         try (Socket serverSocket = new Socket(info.ip, info.puerto);
