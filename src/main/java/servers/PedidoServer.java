@@ -15,6 +15,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -101,6 +102,7 @@ public class PedidoServer {
 
     public String obtenerIpLocal() {
         try {
+            String ipPrivadaAlternativa = null;
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface iface = interfaces.nextElement();
@@ -109,23 +111,31 @@ public class PedidoServer {
                     continue;
                 }
 
-                String nombre = iface.getName().toLowerCase();
-                String displayName = iface.getDisplayName().toLowerCase();
-
+                // Windows puede enumerar Ethernet antes que el adaptador Wi-Fi.
+                String nombre = (iface.getName() + " " + iface.getDisplayName())
+                        .toLowerCase(Locale.ROOT).replace("-", "").replace(" ", "");
+                boolean esWifi = nombre.contains("wifi") || nombre.contains("wlan")
+                        || nombre.contains("wireless") || nombre.contains("802.11");
 
                 // Recorrer direcciones IP asignadas a esta interfaz
                 Enumeration<InetAddress> addresses = iface.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
 
-                    // Buscar IPv4 válida que no sea de loopback ni enlace local (169.254.x.x)
+                    // Buscar IPv4 válida
                     if (addr instanceof Inet4Address && !addr.isLoopbackAddress() && !addr.isLinkLocalAddress()) {
-                        // Priorizar direcciones de red local privada (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-                        if (addr.isSiteLocalAddress()) {
+                        if (esWifi) {
                             return addr.getHostAddress();
+                        }
+                        if (addr.isSiteLocalAddress() && ipPrivadaAlternativa == null) {
+                            ipPrivadaAlternativa = addr.getHostAddress();
                         }
                     }
                 }
+            }
+
+            if (ipPrivadaAlternativa != null) {
+                return ipPrivadaAlternativa;
             }
 
             // Segunda pasada más permisiva en caso de que ninguna coincida con los filtros estrictos
